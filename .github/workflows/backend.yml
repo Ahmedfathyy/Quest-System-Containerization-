@@ -1,0 +1,41 @@
+name: Backend CI/CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '14'
+
+    - name: Install Dependencies
+      run: npm install
+      working-directory: ./quests/code-quests-backend
+
+    # - name:  Test
+    #   run:   npm run test
+    #   working-directory: ./quests/code-quests-backend
+
+    - name: Build
+      run: npm run compile
+      working-directory: ./quests/code-quests-backend
+
+    - name: Upload to FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: '/fathy/'
+        local-dir: './quests/code-quests-backend/out/' 
+

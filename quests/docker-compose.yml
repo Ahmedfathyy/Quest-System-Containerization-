@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI(http)
+
+  postgresql:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: code-quests-db
+      POSTGRES_USER: yahmed
+      POSTGRES_PASSWORD: fathy
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/data
+
+  code-quests-backend:
+    build:
+      context: ./code-quests-backend
+    depends_on:
+      - postgresql
+      - mailhog
+    environment:
+      DB_CONNECTION: postgres://yahmed:fathy@localhost:5432/code-quests-db
+      SMTP_HOST: mailhog
+      SMTP_PORT: 1025
+
+    ports:
+      - "3001:3030"
+
+  code-quests-web:
+    build:
+      context: ./code-quests-web
+    ports:
+      - "8080:80"
+    
+volumes:
+  postgres-data:
